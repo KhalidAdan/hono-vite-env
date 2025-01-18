@@ -322,7 +322,7 @@ describe("vite-env-validate", () => {
     });
 
     it("should handle invalid envDir path", async () => {
-      const plugin = env({
+      let plugin = env({
         schema: z.object({
           MUST_EXIST: z.string(),
         }),
@@ -355,7 +355,7 @@ describe("vite-env-validate", () => {
     });
 
     it("should handle malformed .env file", async () => {
-      const plugin = env({
+      let plugin = env({
         schema: z.object({
           MULTIPLE_EQUALS: z
             .string()

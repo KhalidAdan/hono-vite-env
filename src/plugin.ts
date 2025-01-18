@@ -54,6 +54,21 @@ export function env(options: EnvValidateOptions = {}): Plugin {
   return {
     name: "vite-env-validate",
     enforce: "pre",
+    config: () => {
+      if (process.env.NODE_ENV === "production") return {};
+
+      let env = loadEnv(process.env.NODE_ENV || "development", envDir, "");
+      validateEnv(env);
+
+      let defineEnv: Record<string, string> = {};
+
+      Object.keys(validatedEnv!).forEach((key) => {
+        if (/^[a-zA-Z_$][a-zA-Z0-9_$]*$/.test(key)) {
+          defineEnv[`process.env.${key}`] = JSON.stringify(validatedEnv![key]);
+        }
+      });
+      return { define: defineEnv };
+    },
     configResolved: (config) => {
       let env = loadEnv(config.mode, envDir, "");
 
