@@ -8,8 +8,7 @@
   "exports": {
     ".": {
       "import": "./dist/hono-vite-env.es.js",
-      "require": "./dist/hono-vite-env.umd.js",
-      "types": "./dist/index.d.ts"
+      "require": "./dist/hono-vite-env.umd.js"
     }
   },
   "files": [

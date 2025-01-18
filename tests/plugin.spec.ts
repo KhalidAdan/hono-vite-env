@@ -4,7 +4,7 @@ import { join } from "path";
 import { build } from "vite";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { z } from "zod";
-import { honoEnvPlugin } from "../../src/plugin";
+import { honoEnvPlugin } from "../src/plugin";
 
 describe("honoEnvPlugin", () => {
   let mockExit = vi
