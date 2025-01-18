@@ -1,6 +1,6 @@
 {
   "name": "vite-env-validate",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "type": "module",
   "description": "Environment variable validation plugin for Hono + Vite",
   "main": "./dist/vite-env-validate.umd.js",
