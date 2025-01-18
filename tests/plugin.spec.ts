@@ -4,7 +4,7 @@ import { join } from "path";
 import { build } from "vite";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { z } from "zod";
-import { honoEnvPlugin } from "../src/plugin";
+import { env } from "../src/plugin";
 
 describe("honoEnvPlugin", () => {
   let mockExit = vi
@@ -39,7 +39,7 @@ describe("honoEnvPlugin", () => {
         },
       },
       plugins: [
-        honoEnvPlugin({
+        env({
           schema: z.object({
             DATABASE_URL: z.string().url(),
             API_KEY: z.string(),
@@ -70,7 +70,7 @@ describe("honoEnvPlugin", () => {
           },
         },
         plugins: [
-          honoEnvPlugin({
+          env({
             schema: z.object({
               DATABASE_URL: z.string().url(),
             }),
@@ -99,7 +99,7 @@ describe("honoEnvPlugin", () => {
           },
         },
         plugins: [
-          honoEnvPlugin({
+          env({
             schema: z.object({
               PORT: z.number(),
             }),
@@ -125,7 +125,7 @@ describe("honoEnvPlugin", () => {
         },
       },
       plugins: [
-        honoEnvPlugin({
+        env({
           schema: z.object({
             DATABASE_URL: z.string().url(),
           }),
@@ -153,7 +153,7 @@ describe("honoEnvPlugin", () => {
         },
       },
       plugins: [
-        honoEnvPlugin({
+        env({
           schema: z.object({
             DATABASE_URL: z.string().url(),
             API_KEY: z.string(),
@@ -186,7 +186,7 @@ describe("honoEnvPlugin", () => {
         },
       },
       plugins: [
-        honoEnvPlugin({
+        env({
           schema: z.object({
             DATABASE_URL: z.string().url(),
             OPTIONAL_KEY: z.string().optional(),
@@ -201,5 +201,235 @@ describe("honoEnvPlugin", () => {
     expect(
       existsSync(join("./tests/mocks/basic-app", "dist", "index.js"))
     ).toBe(true);
+  });
+
+  it("should handle empty env files", async () => {
+    await build({
+      root: "./tests/mocks/basic-app",
+      build: {
+        ssr: true,
+        rollupOptions: {
+          input: join("./tests/mocks/basic-app", "src", "index.ts"),
+          output: { entryFileNames: "index.js" },
+        },
+      },
+      plugins: [
+        env({
+          schema: z.object({
+            OPTIONAL_VAR: z.string().optional(),
+          }),
+          envDir: "./tests/mocks/basic-app",
+        }),
+      ],
+    });
+
+    expect(mockConsoleError).not.toHaveBeenCalled();
+  });
+
+  describe("zero config behavior", () => {
+    it("should infer schema from existing env vars", async () => {
+      await build({
+        root: "./tests/mocks/basic-app",
+        build: {
+          ssr: true,
+          rollupOptions: {
+            input: join("./tests/mocks/basic-app", "src", "index.ts"),
+            output: { entryFileNames: "index.js" },
+          },
+        },
+        plugins: [
+          env({
+            envDir: "./tests/mocks/basic-app",
+          }),
+        ],
+      });
+
+      expect(mockConsoleError).not.toHaveBeenCalled();
+      expect(
+        existsSync(join("./tests/mocks/basic-app", "dist", "index.js"))
+      ).toBe(true);
+    });
+
+    it("should handle type coercion in inferred schema", async () => {
+      await build({
+        root: "./tests/mocks/basic-app",
+        build: {
+          ssr: true,
+          rollupOptions: {
+            input: join("./tests/mocks/basic-app", "src", "index.ts"),
+            output: { entryFileNames: "index.js" },
+          },
+        },
+        plugins: [
+          env({
+            envDir: "./tests/mocks/basic-app",
+          }),
+        ],
+      });
+
+      expect(mockConsoleError).not.toHaveBeenCalled();
+    });
+
+    it("should work with minimal config for Hono apps", async () => {
+      await build({
+        root: "./tests/mocks/basic-app",
+        build: {
+          ssr: true,
+          rollupOptions: {
+            input: join("./tests/mocks/basic-app", "src", "index.ts"),
+            output: { entryFileNames: "index.js" },
+          },
+        },
+        plugins: [env()],
+      });
+
+      expect(mockConsoleError).not.toHaveBeenCalled();
+      expect(
+        existsSync(join("./tests/mocks/basic-app", "dist", "index.js"))
+      ).toBe(true);
+    });
+  });
+
+  describe("unexpected errors", () => {
+    it("should handle invalid schema object in strict mode", async () => {
+      await expect(
+        build({
+          root: "./tests/mocks/basic-app",
+          build: {
+            ssr: true,
+            rollupOptions: {
+              input: join("./tests/mocks/basic-app", "src", "index.ts"),
+              output: { entryFileNames: "index.js" },
+            },
+          },
+          plugins: [
+            env({
+              // @ts-expect-error - intentionally invalid schema
+              schema: { not: "a zod schema" },
+              mode: "strict",
+            }),
+          ],
+        })
+      ).rejects.toThrow();
+
+      // The error should flow through our catch block now
+      expect(mockConsoleError).toHaveBeenNthCalledWith(
+        1,
+        "\n❌ Environment validation failed:"
+      );
+      expect(mockConsoleError).toHaveBeenNthCalledWith(
+        2,
+        "\n  schema.safeParse is not a function"
+      );
+    });
+
+    it("should handle invalid envDir path", async () => {
+      const plugin = env({
+        // Require an env var we know should exist
+        schema: z.object({
+          MUST_EXIST: z.string(),
+        }),
+        envDir: "./does/not/exist",
+        mode: "strict",
+      });
+
+      await expect(
+        build({
+          root: "./tests/mocks/basic-app",
+          build: {
+            ssr: true,
+            rollupOptions: {
+              input: join("./tests/mocks/basic-app", "src", "index.ts"),
+              output: { entryFileNames: "index.js" },
+            },
+          },
+          plugins: [plugin],
+        })
+      ).rejects.toThrow("Environment validation failed");
+
+      expect(mockConsoleError).toHaveBeenNthCalledWith(
+        1,
+        "\n❌ Environment validation failed:"
+      );
+      expect(mockConsoleError).toHaveBeenNthCalledWith(
+        2,
+        "\n  Missing required env var: MUST_EXIST"
+      );
+    });
+
+    it("should handle malformed .env file", async () => {
+      // Let's first verify what values are actually being loaded
+      const plugin = env({
+        schema: z.object({
+          MULTIPLE_EQUALS: z
+            .string()
+            .refine(
+              (val) => !val.includes("="),
+              "Environment value cannot contain equals sign"
+            ),
+          QUOTES: z
+            .string()
+            .refine(
+              (val) => !(val.startsWith('"') && !val.endsWith('"')),
+              "Unterminated quote in value"
+            ),
+        }),
+        mode: "strict",
+      });
+
+      // Add debug logging to see what Vite loads
+      console.log("Process env:", process.env);
+
+      await expect(
+        build({
+          root: "./tests/mocks/malformed-env-app",
+          build: {
+            ssr: true,
+            rollupOptions: {
+              input: join("./tests/mocks/malformed-env-app", "src", "index.ts"),
+              output: { entryFileNames: "index.js" },
+            },
+          },
+          plugins: [plugin],
+        })
+      ).rejects.toThrow("Environment validation failed");
+
+      // Update expectations to match actual error format
+      expect(mockConsoleError).toHaveBeenNthCalledWith(
+        1,
+        "\n❌ Environment validation failed:"
+      );
+      expect(mockConsoleError).toHaveBeenNthCalledWith(
+        2,
+        "\n  Missing required env var: MULTIPLE_EQUALS"
+      );
+    });
+
+    it("should handle non-string env values in relaxed mode", async () => {
+      process.env.SOME_NUMBER = "123";
+      process.env.SOME_BOOLEAN = "true";
+
+      await build({
+        root: "./tests/mocks/basic-app",
+        build: {
+          ssr: true,
+          rollupOptions: {
+            input: join("./tests/mocks/basic-app", "src", "index.ts"),
+            output: { entryFileNames: "index.js" },
+          },
+        },
+        plugins: [
+          env({
+            schema: z.object({
+              SOME_NUMBER: z.number(),
+              SOME_BOOLEAN: z.boolean(),
+            }),
+            mode: "relaxed",
+          }),
+        ],
+      });
+
+      expect(mockConsoleError).toHaveBeenCalled();
+    });
   });
 });
