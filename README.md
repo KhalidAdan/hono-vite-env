@@ -1,12 +1,12 @@
 # vite-env-validate
 
-Environment variable validation plugin for Hono + Vite projects. Stop worrying about missing or invalid environment variables across development, testing, and production.
+Environment variable validation plugin for Vite projects. Stop worrying about missing or invalid environment variables across development, testing, and production.
 
 ## Quick Start
 
 ```ts
 import { defineConfig } from "vite";
-import { honoEnv } from "vite-env-validate";
+import { env } from "vite-env-validate";
 import { z } from "zod";
 
 let schema = z.object({
@@ -19,7 +19,7 @@ let schema = z.object({
 export default defineConfig({
   plugins: [
     // Env validation comes first
-    honoEnv({
+    env({
       schema,
       mode: "strict",
       test: {
@@ -46,13 +46,12 @@ That's it! The plugin will:
 - 🔒 Type-safe environment variables with Zod
 - 💥 Fails fast when required variables are missing
 - 🧪 Test environment support with defaults
-- 🔄 Works seamlessly with @hono/vite-build
 - 📝 Detailed error messages for easy debugging
 
 ## Options
 
 ```ts
-interface HonoEnvOptions {
+interface EnvValidateOptions {
   // Your Zod schema for validation
   schema: z.ZodSchema;
 
@@ -76,7 +75,7 @@ interface HonoEnvOptions {
 For testing, you can provide default values that will only be used in test mode:
 
 ```ts
-honoEnv({
+env({
   schema: z.object({
     DATABASE_URL: z.string().url(),
     API_KEY: z.string(),
@@ -87,27 +86,6 @@ honoEnv({
       API_KEY: "test-key",
     },
   },
-});
-```
-
-### Using with @hono/vite-build
-
-```ts
-import { defineConfig } from "vite";
-import { honoEnv } from "@hono/vite-env";
-import build from "@hono/vite-build/node";
-
-export default defineConfig({
-  plugins: [
-    honoEnv({
-      schema: z.object({
-        // your schema
-      }),
-    }),
-    build({
-      // options
-    }),
-  ],
 });
 ```
 
