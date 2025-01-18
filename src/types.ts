@@ -27,7 +27,7 @@ import { z } from "zod";
  * });
  * ```
  */
-export interface HonoEnvOptions {
+export interface EnvValidateOptions {
   /**
    * Zod schema for validating environment variables.
    * Use this to define the shape and validation rules for your environment.

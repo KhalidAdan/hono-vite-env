@@ -1,14 +1,14 @@
 {
-  "name": "hono-vite-env",
+  "name": "vite-env-validate",
   "version": "0.2.0",
   "type": "module",
   "description": "Environment variable validation plugin for Hono + Vite",
-  "main": "./dist/hono-vite-env.umd.js",
-  "module": "./dist/hono-vite-env.es.js",
+  "main": "./dist/vite-env-validate.umd.js",
+  "module": "./dist/vite-env-validate.es.js",
   "exports": {
     ".": {
-      "import": "./dist/hono-vite-env.es.js",
-      "require": "./dist/hono-vite-env.umd.js"
+      "import": "./dist/vite-env-validate.es.js",
+      "require": "./dist/vite-env-validate.umd.js"
     }
   },
   "files": [

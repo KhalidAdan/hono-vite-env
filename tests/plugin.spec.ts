@@ -1,4 +1,3 @@
-// tests/plugin.test.ts
 import { existsSync, rmSync } from "node:fs";
 import { join } from "path";
 import { build } from "vite";
@@ -6,7 +5,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { z } from "zod";
 import { env } from "../src/plugin";
 
-describe("honoEnvPlugin", () => {
+describe("vite-env-validate", () => {
   let mockExit = vi
     .spyOn(process, "exit")
     .mockImplementation(() => undefined as never);
@@ -270,7 +269,7 @@ describe("honoEnvPlugin", () => {
       expect(mockConsoleError).not.toHaveBeenCalled();
     });
 
-    it("should work with minimal config for Hono apps", async () => {
+    it("should work with minimal config", async () => {
       await build({
         root: "./tests/mocks/basic-app",
         build: {
@@ -312,7 +311,6 @@ describe("honoEnvPlugin", () => {
         })
       ).rejects.toThrow();
 
-      // The error should flow through our catch block now
       expect(mockConsoleError).toHaveBeenNthCalledWith(
         1,
         "\n❌ Environment validation failed:"
@@ -325,7 +323,6 @@ describe("honoEnvPlugin", () => {
 
     it("should handle invalid envDir path", async () => {
       const plugin = env({
-        // Require an env var we know should exist
         schema: z.object({
           MUST_EXIST: z.string(),
         }),
@@ -358,7 +355,6 @@ describe("honoEnvPlugin", () => {
     });
 
     it("should handle malformed .env file", async () => {
-      // Let's first verify what values are actually being loaded
       const plugin = env({
         schema: z.object({
           MULTIPLE_EQUALS: z
@@ -377,7 +373,6 @@ describe("honoEnvPlugin", () => {
         mode: "strict",
       });
 
-      // Add debug logging to see what Vite loads
       console.log("Process env:", process.env);
 
       await expect(
@@ -394,7 +389,6 @@ describe("honoEnvPlugin", () => {
         })
       ).rejects.toThrow("Environment validation failed");
 
-      // Update expectations to match actual error format
       expect(mockConsoleError).toHaveBeenNthCalledWith(
         1,
         "\n❌ Environment validation failed:"

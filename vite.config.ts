@@ -8,8 +8,8 @@ export default defineConfig({
   build: {
     lib: {
       entry: resolve(__dirname, "src/index.ts"),
-      name: "hono-vite-env",
-      fileName: (format) => `hono-vite-env.${format}.js`,
+      name: "vite-env-validate",
+      fileName: (format) => `vite-env-validate.${format}.js`,
     },
     rollupOptions: {
       external: ["vite", "zod"],

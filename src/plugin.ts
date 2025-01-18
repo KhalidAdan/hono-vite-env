@@ -1,6 +1,6 @@
 import { loadEnv, type Plugin } from "vite";
 import { z } from "zod";
-import { HonoEnvOptions } from "./types";
+import { EnvValidateOptions } from "./types";
 
 function inferEnvSchema(env: Record<string, string>) {
   let schema: Record<string, z.ZodString> = {};
@@ -12,7 +12,7 @@ function inferEnvSchema(env: Record<string, string>) {
   return z.object(schema);
 }
 
-export function env(options: HonoEnvOptions = {}): Plugin {
+export function env(options: EnvValidateOptions = {}): Plugin {
   let { mode = "strict", envDir = process.cwd() } = options;
 
   let validatedEnv: Record<string, any> | null = null;
@@ -52,7 +52,7 @@ export function env(options: HonoEnvOptions = {}): Plugin {
   };
 
   return {
-    name: "hono-vite-env",
+    name: "vite-env-validate",
     enforce: "pre",
     configResolved: (config) => {
       let env = loadEnv(config.mode, envDir, "");
@@ -65,40 +65,6 @@ export function env(options: HonoEnvOptions = {}): Plugin {
     buildStart: () => {
       let env = loadEnv(process.env.NODE_ENV || "production", envDir, "");
       validateEnv(env);
-    },
-    resolveId(id) {
-      if (id === "virtual:hono-vite-env") {
-        return "\0virtual:hono-vite-env";
-      }
-      return null;
-    },
-    load(id) {
-      if (id === "\0virtual:hono-vite-env") {
-        if (!validatedEnv) {
-          throw new Error("Environment not yet validated");
-        }
-
-        // Just export types for Hono's env()
-        return `
-          declare module 'hono' {
-            interface ContextEnv {
-              Bindings: {
-                ${Object.keys(validatedEnv)
-                  .map((key) => `${key}: string`)
-                  .join(",\n                ")}
-              }
-            }
-          }
-          
-          // Export type for explicit typing if needed
-          export type HonoEnv = {
-            ${Object.keys(validatedEnv)
-              .map((key) => `${key}: string`)
-              .join(",\n            ")}
-          }
-        `;
-      }
-      return null;
     },
   };
 }

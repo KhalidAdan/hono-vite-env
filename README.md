@@ -1,4 +1,4 @@
-# hono-vite-env
+# vite-env-validate
 
 Environment variable validation plugin for Hono + Vite projects. Stop worrying about missing or invalid environment variables across development, testing, and production.
 
@@ -6,7 +6,7 @@ Environment variable validation plugin for Hono + Vite projects. Stop worrying a
 
 ```ts
 import { defineConfig } from "vite";
-import { honoEnv } from "hono-vite-env";
+import { honoEnv } from "vite-env-validate";
 import { z } from "zod";
 
 let schema = z.object({
