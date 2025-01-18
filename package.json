@@ -1,0 +1,45 @@
+{
+  "name": "hono-vite-env",
+  "version": "0.1.0",
+  "type": "module",
+  "description": "Environment variable validation plugin for Hono + Vite",
+  "main": "./dist/hono-vite-env.umd.js",
+  "module": "./dist/hono-vite-env.es.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": "./dist/hono-vite-env.es.js",
+      "require": "./dist/hono-vite-env.umd.js",
+      "types": "./dist/index.d.ts"
+    }
+  },
+  "files": [
+    "dist",
+    "README.md"
+  ],
+  "scripts": {
+    "test": "vitest"
+  },
+  "devDependencies": {
+    "@hono/vite-dev-server": "^0.18.1",
+    "@types/node": "^22.10.7",
+    "tsup": "^8.3.5",
+    "typescript": "^5.7.3",
+    "vite": "^6.0.7",
+    "vite-plugin-dts": "^4.5.0",
+    "vitest": "^3.0.2",
+    "zod": "^3.24.1"
+  },
+  "keywords": [
+    "hono",
+    "vite",
+    "plugin",
+    "env",
+    "validation"
+  ],
+  "author": "https://github.com/KhalidAdan",
+  "license": "MIT",
+  "publishConfig": {
+    "access": "public"
+  }
+}
