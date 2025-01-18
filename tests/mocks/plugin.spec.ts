@@ -136,7 +136,6 @@ describe("honoEnvPlugin", () => {
     });
 
     expect(mockConsoleError).toHaveBeenCalled();
-    // Build should complete despite errors
     expect(
       existsSync(join("./tests/mocks/missing-env-app", "dist", "index.js"))
     ).toBe(true);
@@ -166,6 +165,34 @@ describe("honoEnvPlugin", () => {
               API_KEY: "test-key",
             },
           },
+        }),
+      ],
+    });
+
+    expect(mockConsoleError).not.toHaveBeenCalled();
+    expect(
+      existsSync(join("./tests/mocks/basic-app", "dist", "index.js"))
+    ).toBe(true);
+  });
+
+  it("should handle optional fields correctly", async () => {
+    await build({
+      root: "./tests/mocks/basic-app",
+      build: {
+        ssr: true,
+        rollupOptions: {
+          input: join("./tests/mocks/basic-app", "src", "index.ts"),
+          output: { entryFileNames: "index.js" },
+        },
+      },
+      plugins: [
+        honoEnvPlugin({
+          schema: z.object({
+            DATABASE_URL: z.string().url(),
+            OPTIONAL_KEY: z.string().optional(),
+            OPTIONAL_WITH_DEFAULT: z.string().default("fallback"),
+          }),
+          envDir: "./tests/mocks/basic-app",
         }),
       ],
     });
