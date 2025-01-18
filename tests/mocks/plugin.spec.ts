@@ -2,7 +2,7 @@
 import { existsSync, rmSync } from "node:fs";
 import { join } from "path";
 import { build } from "vite";
-import { afterAll, beforeAll, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { z } from "zod";
 import { honoEnvPlugin } from "../../src/plugin";
 
@@ -13,29 +13,26 @@ describe("honoEnvPlugin", () => {
   const mockConsoleError = vi
     .spyOn(console, "error")
     .mockImplementation(() => undefined);
-  const TEST_APP_PATH = "./tests/mocks/basic-app";
 
-  beforeAll(() => {
+  beforeEach(() => {
     mockExit.mockClear();
     mockConsoleError.mockClear();
   });
 
-  afterAll(() => {
-    rmSync(join(TEST_APP_PATH, "dist"), { recursive: true, force: true });
+  afterEach(() => {
+    rmSync(join("./tests/mocks/basic-app", "dist"), {
+      recursive: true,
+      force: true,
+    });
   });
 
   it("should successfully build with valid env vars", async () => {
-    const envContent = await import("fs").then((fs) =>
-      fs.readFileSync(join(TEST_APP_PATH, ".env"), "utf-8")
-    );
-    console.log("Current env file content:", envContent);
-
     await build({
-      root: TEST_APP_PATH,
+      root: "./tests/mocks/basic-app",
       build: {
         ssr: true,
         rollupOptions: {
-          input: join(TEST_APP_PATH, "src", "index.ts"),
+          input: join("./tests/mocks/basic-app", "src", "index.ts"),
           output: {
             entryFileNames: "index.js",
           },
@@ -47,12 +44,14 @@ describe("honoEnvPlugin", () => {
             DATABASE_URL: z.string().url(),
             API_KEY: z.string(),
           }),
-          envDir: TEST_APP_PATH,
+          envDir: "./tests/mocks/basic-app",
         }),
       ],
     });
 
-    expect(existsSync(join(TEST_APP_PATH, "dist", "index.js"))).toBe(true);
+    expect(
+      existsSync(join("./tests/mocks/basic-app", "dist", "index.js"))
+    ).toBe(true);
     expect(mockExit).not.toHaveBeenCalled();
     expect(mockConsoleError).not.toHaveBeenCalled();
   });
@@ -113,5 +112,67 @@ describe("honoEnvPlugin", () => {
     expect(mockConsoleError).toHaveBeenCalledWith(
       expect.stringContaining("PORT")
     );
+  });
+
+  it("should not fail in relaxed mode when vars are missing", async () => {
+    await build({
+      root: "./tests/mocks/missing-env-app",
+      build: {
+        ssr: true,
+        rollupOptions: {
+          input: join("./tests/mocks/missing-env-app", "src", "index.ts"),
+          output: { entryFileNames: "index.js" },
+        },
+      },
+      plugins: [
+        honoEnvPlugin({
+          schema: z.object({
+            DATABASE_URL: z.string().url(),
+          }),
+          mode: "relaxed",
+          envDir: "./tests/mocks/missing-env-app",
+        }),
+      ],
+    });
+
+    expect(mockConsoleError).toHaveBeenCalled();
+    // Build should complete despite errors
+    expect(
+      existsSync(join("./tests/mocks/missing-env-app", "dist", "index.js"))
+    ).toBe(true);
+  });
+
+  it("should use test defaults in test mode", async () => {
+    await build({
+      root: "./tests/mocks/basic-app",
+      mode: "test",
+      build: {
+        ssr: true,
+        rollupOptions: {
+          input: join("./tests/mocks/basic-app", "src", "index.ts"),
+          output: { entryFileNames: "index.js" },
+        },
+      },
+      plugins: [
+        honoEnvPlugin({
+          schema: z.object({
+            DATABASE_URL: z.string().url(),
+            API_KEY: z.string(),
+          }),
+          envDir: "./tests/mocks/basic-app",
+          test: {
+            defaults: {
+              DATABASE_URL: "sqlite://test.db",
+              API_KEY: "test-key",
+            },
+          },
+        }),
+      ],
+    });
+
+    expect(mockConsoleError).not.toHaveBeenCalled();
+    expect(
+      existsSync(join("./tests/mocks/basic-app", "dist", "index.js"))
+    ).toBe(true);
   });
 });
