@@ -5,7 +5,6 @@
   "description": "Environment variable validation plugin for Hono + Vite",
   "main": "./dist/hono-vite-env.umd.js",
   "module": "./dist/hono-vite-env.es.js",
-  "types": "./dist/index.d.ts",
   "exports": {
     ".": {
       "import": "./dist/hono-vite-env.es.js",

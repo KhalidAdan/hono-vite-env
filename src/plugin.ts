@@ -10,20 +10,19 @@ export function honoEnvPlugin(options: HonoEnvOptions): Plugin {
 
       if (!result.success) {
         console.error("\n❌ Environment validation failed:");
+
         result.error.issues.forEach((issue) => {
           if (issue.code === "invalid_type" && issue.received === "undefined") {
-            // Required field is missing
             console.error(
               `\n  Missing required env var: ${issue.path.join(".")}`
             );
           } else {
-            // Other validation errors
             console.error(`\n  ${issue.path.join(".")}: ${issue.message}`);
           }
         });
 
         if (mode === "strict") {
-          process.exit(1);
+          throw new Error("Environment validation failed");
         }
       }
 

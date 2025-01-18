@@ -1,4 +1,5 @@
-// vite.config.ts
+/// <reference types="vitest" />
+
 import { resolve } from "path";
 import { defineConfig } from "vite";
 import dts from "vite-plugin-dts";
@@ -11,10 +12,8 @@ export default defineConfig({
       fileName: (format) => `hono-vite-env.${format}.js`,
     },
     rollupOptions: {
-      // External dependencies we don't want to bundle
       external: ["vite", "zod"],
       output: {
-        // Global variables to use for externalized deps
         globals: {
           vite: "vite",
           zod: "zod",
@@ -34,7 +33,7 @@ export default defineConfig({
   },
   plugins: [
     dts({
-      insertTypesEntry: true, // Generates index.d.ts
+      insertTypesEntry: true,
     }),
   ],
 });
