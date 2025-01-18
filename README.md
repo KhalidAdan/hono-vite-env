@@ -9,7 +9,7 @@ import { defineConfig } from "vite";
 import { honoEnv } from "hono-vite-env";
 import { z } from "zod";
 
-const schema = z.object({
+let schema = z.object({
   NODE_ENV: z.enum(["development", "production", "test"]),
   DATABASE_URL: z.string().url(),
   API_KEY: z.string().min(1),

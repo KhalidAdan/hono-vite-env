@@ -17,9 +17,15 @@
     "README.md"
   ],
   "scripts": {
-    "test": "vitest"
+    "lint": "eslint .",
+    "test": "vitest",
+    "build": "tsup",
+    "watch": "tsup --watch",
+    "prerelease": "vite build",
+    "release": "npm publish"
   },
   "devDependencies": {
+    "@hono/eslint-config": "^1.0.2",
     "@hono/vite-dev-server": "^0.18.1",
     "@types/node": "^22.10.7",
     "tsup": "^8.3.5",
@@ -40,5 +46,8 @@
   "license": "MIT",
   "publishConfig": {
     "access": "public"
+  },
+  "dependencies": {
+    "eslint": "^9.18.0"
   }
 }

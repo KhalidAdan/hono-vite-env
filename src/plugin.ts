@@ -6,7 +6,7 @@ export function honoEnvPlugin(options: HonoEnvOptions): Plugin {
 
   let validateEnv = (env: Record<string, any>) => {
     try {
-      const result = schema.safeParse(env);
+      let result = schema.safeParse(env);
 
       if (!result.success) {
         console.error("\n❌ Environment validation failed:");
@@ -39,7 +39,7 @@ export function honoEnvPlugin(options: HonoEnvOptions): Plugin {
     name: "hono-vite-env",
     enforce: "pre",
     configResolved: (config) => {
-      const env = loadEnv(config.mode, envDir, "");
+      let env = loadEnv(config.mode, envDir, "");
 
       if (config.mode === "test" && options.test?.defaults) {
         Object.assign(env, options.test.defaults);
@@ -47,7 +47,7 @@ export function honoEnvPlugin(options: HonoEnvOptions): Plugin {
       validateEnv(env);
     },
     buildStart: () => {
-      const env = loadEnv(process.env.NODE_ENV || "production", envDir, "");
+      let env = loadEnv(process.env.NODE_ENV || "production", envDir, "");
       validateEnv(env);
     },
   };

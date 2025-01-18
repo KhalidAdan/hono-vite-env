@@ -7,10 +7,10 @@ import { z } from "zod";
 import { honoEnvPlugin } from "../../src/plugin";
 
 describe("honoEnvPlugin", () => {
-  const mockExit = vi
+  let mockExit = vi
     .spyOn(process, "exit")
     .mockImplementation(() => undefined as never);
-  const mockConsoleError = vi
+  let mockConsoleError = vi
     .spyOn(console, "error")
     .mockImplementation(() => undefined);
 
