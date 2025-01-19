@@ -29,6 +29,7 @@
     "@hono/vite-dev-server": "^0.18.1",
     "@types/node": "^22.10.7",
     "@vitest/coverage-v8": "^3.0.2",
+    "eslint": "^9.18.0",
     "tsup": "^8.3.5",
     "typescript": "^5.7.3",
     "vite": "^6.0.7",
@@ -49,6 +50,6 @@
     "access": "public"
   },
   "dependencies": {
-    "eslint": "^9.18.0"
+    "dotenv": "^16.4.7"
   }
 }

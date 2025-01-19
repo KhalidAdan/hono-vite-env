@@ -80,4 +80,21 @@ export interface EnvValidateOptions {
      */
     defaults?: Record<string, string>;
   };
+
+  /**
+   * Runtime configuration for server-side apps
+   */
+  runtime?: {
+    /**
+     * Whether to load .env files at runtime (server-side only)
+     * @default false
+     */
+    loadEnv?: boolean;
+
+    /**
+     * Whether to require .env file to exist
+     * @default false
+     */
+    requireEnv?: boolean;
+  };
 }
